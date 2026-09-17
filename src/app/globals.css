@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+/*
+ * A tool people open during a stand-up, so it follows the room they are in:
+ * light by default, dark when the system asks. No toggle — nobody wants to
+ * configure a theme while twelve people wait for them to pick a card.
+ */
+@theme {
+  --color-canvas: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-ink: #0f172a;
+  --color-muted: #64748b;
+  --color-line: #e2e8f0;
+  --color-brand: #2563eb;
+  --color-brand-soft: #dbeafe;
+  --color-good: #16a34a;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-space), ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-canvas: #0b1120;
+    --color-surface: #131c2e;
+    --color-ink: #e8eef8;
+    --color-muted: #94a3b8;
+    --color-line: #24304a;
+    --color-brand: #60a5fa;
+    --color-brand-soft: #1e3a5f;
+    --color-good: #4ade80;
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 1rem;
+}
+
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}

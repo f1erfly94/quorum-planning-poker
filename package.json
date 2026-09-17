@@ -1,0 +1,51 @@
+{
+  "name": "quorum",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "worker:dev": "wrangler dev --config worker/wrangler.toml --port 8787",
+    "worker:deploy": "wrangler deploy --config worker/wrangler.toml"
+  },
+  "dependencies": {
+    "next": "16.3.5",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260916.1",
+    "@playwright/test": "^1.63.0",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^24.13.4",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.5",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^5.0.0",
+    "wrangler": "^4.20.0"
+  },
+  "overrides": {
+    "@emnapi/core": "1.11.3",
+    "@emnapi/runtime": "1.11.3"
+  },
+  "optionalDependencies": {
+    "@emnapi/core": "1.11.3",
+    "@emnapi/runtime": "1.11.3"
+  },
+  "browserslist": [
+    "chrome >= 111",
+    "edge >= 111",
+    "firefox >= 111",
+    "safari >= 16.4"
+  ]
+}
