@@ -6,8 +6,10 @@
  * payload.
  */
 const base = process.argv[2] ?? "ws://127.0.0.1:8787";
-// Room ids use a vowel-free alphabet, so "demo42" would be rejected by the worker.
-const room = "kqt394";
+// A fresh room per run: a Durable Object keeps its state, so reusing one id
+// would run the next check against the last run's leftover round.
+const alphabet = "bcdfghjkmnpqrstvwxz23456789";
+const room = Array.from({length: 6}, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
 const failures = [];
 
 const check = (label, condition, detail) => {
@@ -53,7 +55,14 @@ send(linus, {type: "join", name: "Linus"});
 await settle();
 
 check("both people are in the room", latest(ada)?.participants.length === 2, latest(ada)?.participants);
-check("the first to arrive is the host", latest(ada)?.hostId === ada.id);
+
+// Whoever joined first runs the room. Over a real network that is not
+// necessarily whoever connected first, so the test asks who it is rather
+// than assuming — the assumption passed locally and failed in production.
+const hostId = latest(ada)?.hostId;
+check("someone is the host", hostId === ada.id || hostId === linus.id, hostId);
+const host = hostId === ada.id ? ada : linus;
+const guest = host === ada ? linus : ada;
 
 send(ada, {type: "vote", value: "5"});
 send(linus, {type: "vote", value: "8"});
@@ -65,18 +74,18 @@ check("but you can see that they voted", find(ada, "Linus")?.hasVoted === true);
 check("the round is not revealed yet", latest(ada)?.revealed === false);
 check("no summary before the reveal", latest(ada)?.summary === null);
 
-send(linus, {type: "reveal"});
+send(guest, {type: "reveal"});
 await settle();
 check("a guest cannot reveal", latest(ada)?.revealed === false);
 
-send(ada, {type: "reveal"});
+send(host, {type: "reveal"});
 await settle();
 
 check("after the reveal everyone sees every card", find(linus, "Ada")?.vote === "5", find(linus, "Ada"));
 check("the average is computed on the server", latest(ada)?.summary?.average === 6.5, latest(ada)?.summary);
 check("no false consensus", latest(ada)?.summary?.consensus === false);
 
-send(ada, {type: "reset"});
+send(host, {type: "reset"});
 await settle();
 
 check("reset clears the votes", find(ada, "Ada")?.vote === null && find(linus, "Linus")?.vote === null);
