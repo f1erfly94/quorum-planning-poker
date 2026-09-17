@@ -14,7 +14,11 @@ export type Connection = "connecting" | "open" | "reconnecting" | "offline";
  * socket back to the page itself and retry forever.
  */
 const configured = (process.env.NEXT_PUBLIC_WORKER_URL ?? "").trim();
-const workerUrl = configured || "ws://127.0.0.1:8787";
+// Falling back to localhost is a convenience for development. In a production
+// build it would point every visitor at their own machine, so there is no
+// fallback there — the room says what is missing instead.
+const workerUrl =
+    configured || (process.env.NODE_ENV === "production" ? "" : "ws://127.0.0.1:8787");
 const misconfigured = !workerUrl.startsWith("ws://") && !workerUrl.startsWith("wss://");
 
 /** 0.5s, 1s, 2s, 4s, then every 8s — fast enough to feel instant on a blip. */
