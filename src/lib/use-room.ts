@@ -5,7 +5,17 @@ import type {ClientMessage, DeckName, RoomState, ServerMessage} from "@protocol"
 
 export type Connection = "connecting" | "open" | "reconnecting" | "offline";
 
-const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? "ws://127.0.0.1:8787";
+/**
+ * Where the rooms live.
+ *
+ * Trimmed and checked rather than taken on trust: a platform that stores a
+ * declared-but-empty variable as "" would otherwise leave this an empty string,
+ * and `"" + "/room/x"` is a relative URL — the browser would happily open a
+ * socket back to the page itself and retry forever.
+ */
+const configured = (process.env.NEXT_PUBLIC_WORKER_URL ?? "").trim();
+const workerUrl = configured || "ws://127.0.0.1:8787";
+const misconfigured = !workerUrl.startsWith("ws://") && !workerUrl.startsWith("wss://");
 
 /** 0.5s, 1s, 2s, 4s, then every 8s — fast enough to feel instant on a blip. */
 const backoff = (attempt: number) => Math.min(8000, 500 * 2 ** attempt);
@@ -21,8 +31,10 @@ const backoff = (attempt: number) => Math.min(8000, 500 * 2 ** attempt);
 export const useRoom = (roomId: string, name: string | null) => {
     const [state, setState] = useState<RoomState | null>(null);
     const [you, setYou] = useState<string | null>(null);
-    const [connection, setConnection] = useState<Connection>("connecting");
-    const [error, setError] = useState<string | null>(null);
+    const [connection, setConnection] = useState<Connection>(misconfigured ? "offline" : "connecting");
+    const [error, setError] = useState<string | null>(
+        misconfigured ? "The room server is not configured: NEXT_PUBLIC_WORKER_URL must be a ws:// or wss:// URL." : null,
+    );
 
     const socketRef = useRef<WebSocket | null>(null);
     const attemptRef = useRef(0);
@@ -35,7 +47,7 @@ export const useRoom = (roomId: string, name: string | null) => {
     }, []);
 
     useEffect(() => {
-        if (!roomId || !name) return undefined;
+        if (!roomId || !name || misconfigured) return undefined;
 
         closedRef.current = false;
 

@@ -12,4 +12,4 @@ tag = "v1"
 new_sqlite_classes = ["Room"]
 
 [vars]
-ALLOWED_ORIGINS = ""
+ALLOWED_ORIGINS = "https://quorum-planning-poker.vercel.app"
